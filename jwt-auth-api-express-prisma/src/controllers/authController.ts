@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 
 import { validateRegisterInput } from "./../utils/validators";
+import createError from "http-errors";
 
 const prisma = new PrismaClient();
 
@@ -12,7 +13,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     // validate user inputs using joi
     const error = validateRegisterInput(username, email, password, confirmPassword);
     if (error) {
-        return res.status(400).send({ message: "Invalid user inputs provided" });
+        // return res.status(400).send({ message: "Invalid user inputs provided" });
+        return next(createError(400, "Invalid user input(s) provided"));
     }
 
     // checks if user exists on database
@@ -20,7 +22,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         where: { OR: [{ username }, { email }] },
     });
     if (user) {
-        return res.send({ message: "Username or Email has been registered on this server" });
+        return next(createError(409, "This username or email has already been registered"));
     }
 
     // hash password with bcrypt before storing
