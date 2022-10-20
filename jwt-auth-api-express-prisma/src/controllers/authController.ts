@@ -12,7 +12,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const { username, email, password, confirmPassword } = req.body;
 
     // validate user inputs using joi
-    const error = validateRegisterInput(username, email, password, confirmPassword);
+    const { error, validatedValue } = validateRegisterInput(username, email, password, confirmPassword);
     if (error) {
         // return res.status(400).send({ message: "Invalid user inputs provided" });
         return next(createError(400, "Invalid user input(s) provided"));
@@ -20,20 +20,20 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     // checks if user exists on database
     const user = await prisma.user.findFirst({
-        where: { OR: [{ username }, { email }] },
+        where: { OR: [{ username: validatedValue.username }, { email: validatedValue.email }] },
     });
     if (user) {
         return next(createError(409, "This username or email has already been registered"));
     }
 
     // hash password with bcrypt before storing
-    const hashedPassword = await hash(password, 12);
+    const hashedPassword = await hash(validatedValue.password, 12);
 
     // saves the user to the database
     const result = await prisma.user.create({
         data: {
-            username,
-            email,
+            username: validatedValue.username,
+            email: validatedValue.email,
             password: hashedPassword,
         },
     });
@@ -44,7 +44,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const { username, password } = req.body;
 
     // validate user inputs using joi
-    const error = validateLoginInput(username, password);
+    const { error, validatedValue } = validateLoginInput(username, password);
     if (error) {
         // return res.status(400).send({ message: "Invalid user inputs provided" });
         return next(createError(400, "Invalid user input(s) provided"));
@@ -52,14 +52,14 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     // finds user in database
     const user = await prisma.user.findUnique({
-        where: { username },
+        where: { username: validatedValue.username },
     });
     if (!user) {
         return next(createError(401, "Invalid credentials provided"));
     }
 
     // checks if password is correct
-    const match = await compare(password, user.password);
+    const match = await compare(validatedValue.password, user.password);
     if (!match) {
         return next(createError(401, "Invalid credentials provided"));
     }
