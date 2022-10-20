@@ -12,6 +12,11 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
+// Routes
+app.get("/", (req: Request, res: Response, next: NextFunction) => {
+    res.send("Hello, World!");
+});
+
 app.use("/auth", authRouter);
 
 // 404 Not Found Handler
