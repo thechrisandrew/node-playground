@@ -7,7 +7,7 @@ export const generateToken = (userId: string) => {
         };
         const secret: jwt.Secret = process.env.JWT_ACCESS_TOKEN_SECRET as string;
         const options: jwt.SignOptions = {
-            expiresIn: "15m",
+            expiresIn: process.env.JWT_EXPIRES_IN as string,
             issuer: "",
         };
 
