@@ -5,6 +5,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import { notFoundHandler } from "./middlewares/notFoundHandler";
 
 import authRouter from "./routes/authRoute";
+import profileRouter from "./routes/profileRoute";
 
 const app: Application = express();
 
@@ -18,6 +19,8 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/auth", authRouter);
+
+app.use("/profile", profileRouter);
 
 // 404 Not Found Handler
 app.use(notFoundHandler);
