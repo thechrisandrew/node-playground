@@ -14,3 +14,14 @@ export const validateRegisterInput = (username: string, email: string, password:
 
     return error;
 };
+
+export const validateLoginInput = (username: string, password: string) => {
+    const loginSchema = Joi.object().keys({
+        username: Joi.string().alphanum().min(6).max(30).required().trim(),
+        password: Joi.string().trim().min(8).required(),
+    });
+
+    const { error } = loginSchema.validate({ username, password });
+
+    return error;
+};
